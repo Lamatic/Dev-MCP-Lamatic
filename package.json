@@ -1,0 +1,19 @@
+{
+  "name": "lamatic-mcp",
+  "version": "1.0.0",
+  "description": "Lamatic MCP Server",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "fs-extra": "^11.3.4",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  }
+}
