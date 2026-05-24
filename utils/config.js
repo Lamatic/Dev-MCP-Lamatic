@@ -11,8 +11,17 @@ function saveConfig(data) {
 }
 
 function getConfig() {
-  if (!fs.existsSync(CONFIG_PATH)) return null;
-  return fs.readJsonSync(CONFIG_PATH);
+  if (!fs.existsSync(CONFIG_PATH)) {
+    throw new Error('Not authenticated. Run: lamatic auth login --api-key <key> --org-id <id>');
+  }
+
+  const config = fs.readJsonSync(CONFIG_PATH);
+
+  if (!config?.apiKey || !config?.orgId) {
+    throw new Error('Not authenticated. Run: lamatic auth login --api-key <key> --org-id <id>');
+  }
+
+  return config;
 }
 
 function clearConfig() {
