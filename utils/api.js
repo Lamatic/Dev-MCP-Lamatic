@@ -165,8 +165,6 @@ async function listAllFlows(projectId) {
 async function renameFlow(projectId, flowId, name) {
   const { apiKey, orgId } = getConfig();
   const url = `https://enterprise-api.edge.lamatic.tech/v1/organizations/${orgId}/project/${projectId}/flows/rename`;
-  console.error('URL:', url);
-  console.error('Body:', { flowId, name });
   const response = await axios.post(
     url,
     { flowId, name },

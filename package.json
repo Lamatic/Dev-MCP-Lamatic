@@ -1,15 +1,30 @@
 {
-  "name": "lamatic-mcp",
-  "version": "1.0.0",
-  "description": "Lamatic MCP Server",
+  "name": "@lamatic/dev-mcp",
+  "version": "1.0.1",
+  "description": "Lamatic DevMCP - Manage your Lamatic projects via AI",
   "main": "server.js",
+  "bin": {
+    "lamatic-dev-mcp": "./server.js"
+  },
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "server.js",
+    "utils/"
+  ],
+  "keywords": ["lamatic", "mcp", "ai", "devops"],
+  "author": "Lamatic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lamatic/Dev-MCP-Lamatic"
+  },
+  "homepage": "https://github.com/Lamatic/Dev-MCP-Lamatic#readme",
+  "bugs": {
+    "url": "https://github.com/Lamatic/Dev-MCP-Lamatic/issues"
+  },
   "dependencies": {
     "axios": "^1.13.6",
     "fs-extra": "^11.3.4",

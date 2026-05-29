@@ -1,16 +1,17 @@
+#!/usr/bin/env node
+
 const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
 const { z } = require('zod');
-const { getConfig, saveConfig , clearConfig} = require('./utils/config');
-const { createProject, createFlow, triggerDeployment, getProject, updateProject , listProjects, getFlows, deleteProject, updateFlow, deleteFlow, listAllFlows, renameFlow, updateFlowStatus, createContext, deleteContext, getContext, getAllContexts, listAllDeployments, getDeployment, listModelCreds, listModelProviders, checkModelStatus, createModelCreds, listSupportedIntegrations , listIntegrationCreds, createIntegrationCreds , getCredInfo, getOAuthUrl, deleteCredential, updateCredential,} = require('./utils/api');
-
+const { getConfig, saveConfig, clearConfig } = require('./utils/config');
+const { createProject, createFlow, triggerDeployment, getProject, updateProject, listProjects, getFlows, deleteProject, updateFlow, deleteFlow, listAllFlows, renameFlow, updateFlowStatus, createContext, deleteContext, getContext, getAllContexts, listAllDeployments, getDeployment, listModelCreds, listModelProviders, checkModelStatus, createModelCreds, listSupportedIntegrations, listIntegrationCreds, createIntegrationCreds, getCredInfo, getOAuthUrl, deleteCredential, updateCredential } = require('./utils/api');
 
 const server = new McpServer({
-  name: 'lamatic',
+  name: 'lamatic-dev',
   version: '1.0.0',
 });
 
-server.tool('auth_login', 'Authenticate with Lamatic', {
+server.tool('dev_auth_login', 'Authenticate with Lamatic DevMCP', {
   apiKey: z.string(),
   orgId: z.string(),
   userId: z.string(),
@@ -19,7 +20,7 @@ server.tool('auth_login', 'Authenticate with Lamatic', {
   return { content: [{ type: 'text', text: `Authenticated successfully! Org ID: ${orgId}` }] };
 });
 
-server.tool('create_project', 'Create a new Lamatic project', {
+server.tool('dev_create_project', 'Create a new Lamatic project', {
   name: z.string(),
   region: z.enum(['us-east-1', 'us-west-2', 'eu-west-1', 'ap-south-1']),
 }, async ({ name, region }) => {
@@ -33,7 +34,7 @@ server.tool('create_project', 'Create a new Lamatic project', {
   }
 });
 
-server.tool('get_project', 'Get details of a Lamatic project', {
+server.tool('dev_get_project', 'Get details of a Lamatic project', {
   projectId: z.string(),
 }, async ({ projectId }) => {
   const config = getConfig();
@@ -46,7 +47,7 @@ server.tool('get_project', 'Get details of a Lamatic project', {
   }
 });
 
-server.tool('create_flow', 'Create a new flow in a Lamatic project', {
+server.tool('dev_create_flow', 'Create a new flow in a Lamatic project', {
   projectId: z.string(),
   name: z.string(),
 }, async ({ projectId, name }) => {
@@ -60,7 +61,7 @@ server.tool('create_flow', 'Create a new flow in a Lamatic project', {
   }
 });
 
-server.tool('get_flows', 'List all flows in a Lamatic project', {
+server.tool('dev_get_flows', 'List all flows in a Lamatic project', {
   projectId: z.string(),
 }, async ({ projectId }) => {
   const config = getConfig();
@@ -76,7 +77,7 @@ server.tool('get_flows', 'List all flows in a Lamatic project', {
   }
 });
 
-server.tool('deploy_project', 'Deploy a Lamatic project', {
+server.tool('dev_deploy_project', 'Deploy a Lamatic project', {
   projectId: z.string(),
   name: z.string().optional(),
   description: z.string().optional(),
@@ -97,7 +98,7 @@ server.tool('deploy_project', 'Deploy a Lamatic project', {
   }
 });
 
-server.tool('list_projects', 'List all projects in your Lamatic organization', { 
+server.tool('dev_list_projects', 'List all projects in your Lamatic organization', {
 }, async () => {
   const config = getConfig();
   if (!config?.apiKey) return { content: [{ type: 'text', text: 'Error: Not authenticated.' }] };
@@ -114,7 +115,7 @@ server.tool('list_projects', 'List all projects in your Lamatic organization', {
   }
 });
 
-server.tool('update_project', 'Rename a Lamatic project', {
+server.tool('dev_update_project', 'Rename a Lamatic project', {
   projectId: z.string(),
   name: z.string(),
 }, async ({ projectId, name }) => {
@@ -128,7 +129,7 @@ server.tool('update_project', 'Rename a Lamatic project', {
   }
 });
 
-server.tool('delete_project', 'Delete a Lamatic project', {
+server.tool('dev_delete_project', 'Delete a Lamatic project', {
   projectId: z.string(),
 }, async ({ projectId }) => {
   const config = getConfig();
@@ -141,429 +142,236 @@ server.tool('delete_project', 'Delete a Lamatic project', {
   }
 });
 
-server.tool(
-  'update_flow',
-  'Update an existing Lamatic flow with new nodes and edges',
-  {
-    projectId: z.string().describe('The project ID'),
-    flowId: z.string().describe('The flow ID to update'),
-    nodes: z.array(z.object({}).passthrough()).describe('Array of node objects'),
-    edges: z.array(z.object({}).passthrough()).describe('Array of edge objects'),
-    status: z.enum(['active', 'inactive']).default('active').describe('Flow status'),
-  },
-  async ({ projectId, flowId, nodes, edges, status }) => {
-    const result = await updateFlow(projectId, flowId, nodes, edges, status);
-    return {
-      content: [{
-        type: 'text',
-        text: `Flow updated!\nFlow ID: ${result.flowId}\nName: ${result.name}\nStatus: ${result.status}`
-      }],
-    };
-  }
-);
+server.tool('dev_update_flow', 'Update an existing Lamatic flow with new nodes and edges', {
+  projectId: z.string().describe('The project ID'),
+  flowId: z.string().describe('The flow ID to update'),
+  nodes: z.array(z.object({}).passthrough()).describe('Array of node objects'),
+  edges: z.array(z.object({}).passthrough()).describe('Array of edge objects'),
+  status: z.enum(['active', 'inactive']).default('active').describe('Flow status'),
+}, async ({ projectId, flowId, nodes, edges, status }) => {
+  const result = await updateFlow(projectId, flowId, nodes, edges, status);
+  return {
+    content: [{ type: 'text', text: `Flow updated!\nFlow ID: ${result.flowId}\nName: ${result.name}\nStatus: ${result.status}` }],
+  };
+});
 
-server.tool(
-  'delete_flow',
-  'Delete a flow from a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    flowId: z.string().describe('The flow ID to delete'),
-  },
-  async ({ projectId, flowId }) => {
-    const result = await deleteFlow(projectId, flowId);
-    return {
-      content: [{
-        type: 'text',
-        text: result.message
-      }],
-    };
-  }
-);
+server.tool('dev_delete_flow', 'Delete a flow from a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  flowId: z.string().describe('The flow ID to delete'),
+}, async ({ projectId, flowId }) => {
+  const result = await deleteFlow(projectId, flowId);
+  return { content: [{ type: 'text', text: result.message }] };
+});
 
-server.tool(
-  'list_all_flows',
-  'List all flows for a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-  },
-  async ({ projectId }) => {
-    const result = await listAllFlows(projectId);
-    const flowList = result.flows
-      .map(f => `- ${f.name} (ID: ${f.id} | Slug: ${f.slug} | Status: ${f.status})`)
-      .join('\n');
-    return {
-      content: [{
-        type: 'text',
-        text: `Flows:\n${flowList}`
-      }],
-    };
-  }
-);
+server.tool('dev_list_all_flows', 'List all flows for a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+}, async ({ projectId }) => {
+  const result = await listAllFlows(projectId);
+  const flowList = result.flows
+    .map(f => `- ${f.name} (ID: ${f.id} | Slug: ${f.slug} | Status: ${f.status})`)
+    .join('\n');
+  return { content: [{ type: 'text', text: `Flows:\n${flowList}` }] };
+});
 
-server.tool(
-  'rename_flow',
-  'Rename a flow in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    flowId: z.string().describe('The flow ID to rename'),
-    name: z.string().describe('The new name for the flow'),
-  },
-  async ({ projectId, flowId, name }) => {
-    const result = await renameFlow(projectId, flowId, name);
-    return {
-      content: [{
-        type: 'text',
-        text: `Flow renamed successfully!\nFlow ID: ${result.flowId}\nNew Name: ${result.name}`
-      }],
-    };
-  }
-);
+server.tool('dev_rename_flow', 'Rename a flow in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  flowId: z.string().describe('The flow ID to rename'),
+  name: z.string().describe('The new name for the flow'),
+}, async ({ projectId, flowId, name }) => {
+  const result = await renameFlow(projectId, flowId, name);
+  return {
+    content: [{ type: 'text', text: `Flow renamed successfully!\nFlow ID: ${result.flowId}\nNew Name: ${result.name}` }],
+  };
+});
 
-server.tool(
-  'update_flow_status',
-  'Update the status of a flow in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    flowId: z.string().describe('The flow ID'),
-    status: z.enum(['active', 'inactive']).describe('The new status for the flow'),
-  },
-  async ({ projectId, flowId, status }) => {
-    const result = await updateFlowStatus(projectId, flowId, status);
-    return {
-      content: [{
-        type: 'text',
-        text: `Flow status updated!\nFlow ID: ${result.flowId}\nStatus: ${result.status}`
-      }],
-    };
-  }
-);
+server.tool('dev_update_flow_status', 'Update the status of a flow in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  flowId: z.string().describe('The flow ID'),
+  status: z.enum(['active', 'inactive']).describe('The new status for the flow'),
+}, async ({ projectId, flowId, status }) => {
+  const result = await updateFlowStatus(projectId, flowId, status);
+  return {
+    content: [{ type: 'text', text: `Flow status updated!\nFlow ID: ${result.flowId}\nStatus: ${result.status}` }],
+  };
+});
 
-server.tool(
-  'create_context',
-  'Create a new context (vector or memory) in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    name: z.string().describe('Name of the context'),
-    type: z.enum(['vector', 'memory']).describe('Type of context'),
-  },
-  async ({ projectId, name, type }) => {
-    const result = await createContext(projectId, name, type);
-    return {
-      content: [{
-        type: 'text',
-        text: `Context created!\nID: ${result.id}\nClass: ${result.class}\nType: ${result.isMemory ? 'memory' : 'vector'}\nProperties: ${result.propertyCount}\nObjects: ${result.objectCount}`
-      }],
-    };
-  }
-);
+server.tool('dev_create_context', 'Create a new context (vector or memory) in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  name: z.string().describe('Name of the context'),
+  type: z.enum(['vector', 'memory']).describe('Type of context'),
+}, async ({ projectId, name, type }) => {
+  const result = await createContext(projectId, name, type);
+  return {
+    content: [{ type: 'text', text: `Context created!\nID: ${result.id}\nClass: ${result.class}\nType: ${result.isMemory ? 'memory' : 'vector'}\nProperties: ${result.propertyCount}\nObjects: ${result.objectCount}` }],
+  };
+});
 
-server.tool(
-  'delete_context',
-  'Delete a context from a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    contextId: z.string().describe('The context ID to delete'),
-  },
-  async ({ projectId, contextId }) => {
-    const result = await deleteContext(projectId, contextId);
-    return {
-      content: [{
-        type: 'text',
-        text: result.message
-      }],
-    };
-  }
-);
+server.tool('dev_delete_context', 'Delete a context from a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  contextId: z.string().describe('The context ID to delete'),
+}, async ({ projectId, contextId }) => {
+  const result = await deleteContext(projectId, contextId);
+  return { content: [{ type: 'text', text: result.message }] };
+});
 
-server.tool(
-  'get_context',
-  'Get details of a specific context in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    contextId: z.string().describe('The context ID'),
-  },
-  async ({ projectId, contextId }) => {
-    const result = await getContext(projectId, contextId);
-    return {
-      content: [{
-        type: 'text',
-        text: `Context Details:\nID: ${result.id}\nName: ${result.name}\nType: ${result.type}\nProperties: ${result.propertyCount}\nObjects: ${result.objectCount}`
-      }],
-    };
-  }
-);
+server.tool('dev_get_context', 'Get details of a specific context in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  contextId: z.string().describe('The context ID'),
+}, async ({ projectId, contextId }) => {
+  const result = await getContext(projectId, contextId);
+  return {
+    content: [{ type: 'text', text: `Context Details:\nID: ${result.id}\nName: ${result.name}\nType: ${result.type}\nProperties: ${result.propertyCount}\nObjects: ${result.objectCount}` }],
+  };
+});
 
-server.tool(
-  'get_all_contexts',
-  'List all contexts in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-  },
-  async ({ projectId }) => {
-    const result = await getAllContexts(projectId);
-    const contextList = result.contexts
-      .map(c => `- ${c.name} (ID: ${c.id} | Type: ${c.type} | Objects: ${c.objectCount})`)
-      .join('\n');
-    return {
-      content: [{
-        type: 'text',
-        text: `Contexts:\n${contextList}`
-      }],
-    };
-  }
-);
+server.tool('dev_get_all_contexts', 'List all contexts in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+}, async ({ projectId }) => {
+  const result = await getAllContexts(projectId);
+  const contextList = result.contexts
+    .map(c => `- ${c.name} (ID: ${c.id} | Type: ${c.type} | Objects: ${c.objectCount})`)
+    .join('\n');
+  return { content: [{ type: 'text', text: `Contexts:\n${contextList}` }] };
+});
 
-server.tool(
-  'list_all_deployments',
-  'List all deployments for a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-  },
-  async ({ projectId }) => {
-    const result = await listAllDeployments(projectId);
-    const list = result.deployments
-      .map(d => `- ${d.name} (ID: ${d.id} | Status: ${d.status})`)
-      .join('\n');
-    return {
-      content: [{
-        type: 'text',
-        text: `Deployments:\n${list}`
-      }],
-    };
-  }
-);
+server.tool('dev_list_all_deployments', 'List all deployments for a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+}, async ({ projectId }) => {
+  const result = await listAllDeployments(projectId);
+  const list = result.deployments
+    .map(d => `- ${d.name} (ID: ${d.id} | Status: ${d.status})`)
+    .join('\n');
+  return { content: [{ type: 'text', text: `Deployments:\n${list}` }] };
+});
 
-server.tool(
-  'get_deployment',
-  'Get details of a specific deployment in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    deploymentId: z.string().describe('The deployment ID'),
-  },
-  async ({ projectId, deploymentId }) => {
-    const result = await getDeployment(projectId, deploymentId);
-    const changes = result.changes_deployed
-      .map(c => `  - ${c.name}`)
-      .join('\n');
-    return {
-      content: [{
-        type: 'text',
-        text: `Deployment Details:
-ID: ${result.id}
-Name: ${result.name}
-Description: ${result.description || 'N/A'}
-Status: ${result.status}
-Triggered By: ${result.triggered_by}
-Created At: ${result.created_at}
-Time Taken: ${result.time_taken_in_seconds}s
-Changes Deployed:\n${changes}`
-      }],
-    };
-  }
-);
+server.tool('dev_get_deployment', 'Get details of a specific deployment in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  deploymentId: z.string().describe('The deployment ID'),
+}, async ({ projectId, deploymentId }) => {
+  const result = await getDeployment(projectId, deploymentId);
+  const changes = result.changes_deployed.map(c => `  - ${c.name}`).join('\n');
+  return {
+    content: [{ type: 'text', text: `Deployment Details:\nID: ${result.id}\nName: ${result.name}\nDescription: ${result.description || 'N/A'}\nStatus: ${result.status}\nTriggered By: ${result.triggered_by}\nCreated At: ${result.created_at}\nTime Taken: ${result.time_taken_in_seconds}s\nChanges Deployed:\n${changes}` }],
+  };
+});
 
-server.tool(
-  'list_model_creds',
-  'List all model credentials for a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-  },
-  async ({ projectId }) => {
-    const result = await listModelCreds(projectId);
-    const list = result.models
-      .map(m => `- ${m.name} (Provider: ${m.provider} | Credential ID: ${m.credentialId})`)
-      .join('\n');
-    return {
-      content: [{ type: 'text', text: `Model Credentials:\n${list}` }],
-    };
-  }
-);
+server.tool('dev_list_model_creds', 'List all model credentials for a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+}, async ({ projectId }) => {
+  const result = await listModelCreds(projectId);
+  const list = result.models
+    .map(m => `- ${m.name} (Provider: ${m.provider} | Credential ID: ${m.credentialId})`)
+    .join('\n');
+  return { content: [{ type: 'text', text: `Model Credentials:\n${list}` }] };
+});
 
-server.tool(
-  'list_model_providers',
-  'List all available model providers, optionally including their models',
-  {
-    projectId: z.string().describe('The project ID'),
-    includeModels: z.boolean().default(false).describe('Include available models for each provider'),
-  },
-  async ({ projectId, includeModels }) => {
-    const result = await listModelProviders(projectId, includeModels);
-    const list = result.providers.map(p => {
-      let entry = `- ${p.name}`;
-      if (includeModels && p.models?.length) {
-        const models = p.models.map(m => `    • ${m.name} (${m.type.join(', ')} | ${m.status})`).join('\n');
-        entry += `\n${models}`;
-      }
-      return entry;
-    }).join('\n');
-    return {
-      content: [{ type: 'text', text: `Providers:\n${list}` }],
-    };
-  }
-);
-
-server.tool(
-  'check_model_status',
-  'Check the availability status of a specific model',
-  {
-    projectId: z.string().describe('The project ID'),
-    modelName: z.string().describe('The model name to check (e.g. command-r7b-12-2024)'),
-  },
-  async ({ projectId, modelName }) => {
-    const result = await checkModelStatus(projectId, modelName);
-    return {
-      content: [{ type: 'text', text: `Model: ${modelName}\nStatus: ${result.status}` }],
-    };
-  }
-);
-
-server.tool(
-  'create_model_creds',
-  'Create new model credentials for a provider in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    name: z.string().describe('Display name for the credential'),
-    provider: z.string().describe('Provider name (e.g. openai, anthropic, mistral)'),
-    credentials: z.record(z.string()).describe('Key-value pairs of credentials required by the provider (e.g. { "apiKey": "sk-..." })'),
-  },
-  async ({ projectId, name, provider, credentials }) => {
-    const result = await createModelCreds(projectId, name, provider, credentials);
-    return {
-      content: [{ type: 'text', text: `Model credential created!\nCredential ID: ${result.credentialId}` }],
-    };
-  }
-);
-
-server.tool(
-  'list_supported_integrations',
-  'List all supported integrations available for a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-  },
-  async ({ projectId }) => {
-    const result = await listSupportedIntegrations(projectId);
-    const list = result.integrations
-      .map(i => `- ${i.name} (Type: ${i.type})`)
-      .join('\n');
-    return {
-      content: [{ type: 'text', text: `Supported Integrations:\n${list}` }],
-    };
-  }
-);
-
-server.tool(
-  'list_integration_creds',
-  'List all integration credentials for a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-  },
-  async ({ projectId }) => {
-    const result = await listIntegrationCreds(projectId);
-    if (!result.integrations.length) {
-      return {
-        content: [{ type: 'text', text: 'No integration credentials found for this project.' }],
-      };
+server.tool('dev_list_model_providers', 'List all available model providers, optionally including their models', {
+  projectId: z.string().describe('The project ID'),
+  includeModels: z.boolean().default(false).describe('Include available models for each provider'),
+}, async ({ projectId, includeModels }) => {
+  const result = await listModelProviders(projectId, includeModels);
+  const list = result.providers.map(p => {
+    let entry = `- ${p.name}`;
+    if (includeModels && p.models?.length) {
+      const models = p.models.map(m => `    • ${m.name} (${m.type.join(', ')} | ${m.status})`).join('\n');
+      entry += `\n${models}`;
     }
-    const list = result.integrations
-      .map(i => `- ${i.name} (Integration: ${i.integration} | Credential ID: ${i.credentialId})`)
-      .join('\n');
-    return {
-      content: [{ type: 'text', text: `Integration Credentials:\n${list}` }],
-    };
-  }
-);
+    return entry;
+  }).join('\n');
+  return { content: [{ type: 'text', text: `Providers:\n${list}` }] };
+});
 
-server.tool(
-  'create_integration_creds',
-  'Create new integration credentials for a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    name: z.string().describe('Display name for the integration credential'),
-    integration: z.string().describe('Integration type (e.g. s3, slack, postgres, gmail, googleDrive)'),
-    credentials: z.record(z.string()).describe('Key-value pairs of credentials required by the integration (e.g. { "apiKey": "sk-..." })'),
-  },
-  async ({ projectId, name, integration, credentials }) => {
-    const result = await createIntegrationCreds(projectId, name, integration, credentials);
-    return {
-      content: [{ type: 'text', text: `Integration credential created!\nCredential ID: ${result.credentialId}` }],
-    };
-  }
-);
+server.tool('dev_check_model_status', 'Check the availability status of a specific model', {
+  projectId: z.string().describe('The project ID'),
+  modelName: z.string().describe('The model name to check (e.g. command-r7b-12-2024)'),
+}, async ({ projectId, modelName }) => {
+  const result = await checkModelStatus(projectId, modelName);
+  return { content: [{ type: 'text', text: `Model: ${modelName}\nStatus: ${result.status}` }] };
+});
 
-server.tool(
-  'get_cred_info',
-  'Get details of a specific credential in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    credentialId: z.string().describe('The credential ID'),
-  },
-  async ({ projectId, credentialId }) => {
-    const result = await getCredInfo(projectId, credentialId);
-    const c = result.credential;
-    return {
-      content: [{
-        type: 'text',
-        text: `Credential Info:\nID: ${c.id}\nName: ${c.name}\nType: ${c.type}\nProvider: ${c.provider}\nCreated At: ${c.created_at}\nUpdated At: ${c.updated_at}`
-      }],
-    };
-  }
-);
+server.tool('dev_create_model_creds', 'Create new model credentials for a provider in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  name: z.string().describe('Display name for the credential'),
+  provider: z.string().describe('Provider name (e.g. openai, anthropic, mistral)'),
+  credentials: z.record(z.string()).describe('Key-value pairs of credentials required by the provider'),
+}, async ({ projectId, name, provider, credentials }) => {
+  const result = await createModelCreds(projectId, name, provider, credentials);
+  return { content: [{ type: 'text', text: `Model credential created!\nCredential ID: ${result.credentialId}` }] };
+});
 
-server.tool(
-  'get_oauth_url',
-  'Get an OAuth authorization URL for an integration in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    nodeName: z.string().describe('The integration node name (e.g. googleDrive, gmail, slack)'),
-    redirectUri: z.string().describe('The redirect URI after OAuth authorization'),
-    credentialName: z.string().describe('Display name for the credential being created'),
-  },
-  async ({ projectId, nodeName, redirectUri, credentialName }) => {
-    const result = await getOAuthUrl(projectId, nodeName, redirectUri, credentialName);
-    return {
-      content: [{
-        type: 'text',
-        text: `OAuth URL:\n${result.authUrl}`
-      }],
-    };
-  }
-);
+server.tool('dev_list_supported_integrations', 'List all supported integrations available for a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+}, async ({ projectId }) => {
+  const result = await listSupportedIntegrations(projectId);
+  const list = result.integrations.map(i => `- ${i.name} (Type: ${i.type})`).join('\n');
+  return { content: [{ type: 'text', text: `Supported Integrations:\n${list}` }] };
+});
 
-server.tool(
-  'delete_credential',
-  'Delete a credential from a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    credentialId: z.string().describe('The credential ID to delete'),
-  },
-  async ({ projectId, credentialId }) => {
-    const result = await deleteCredential(projectId, credentialId);
-    return {
-      content: [{ type: 'text', text: result.message }],
-    };
+server.tool('dev_list_integration_creds', 'List all integration credentials for a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+}, async ({ projectId }) => {
+  const result = await listIntegrationCreds(projectId);
+  if (!result.integrations.length) {
+    return { content: [{ type: 'text', text: 'No integration credentials found for this project.' }] };
   }
-);
+  const list = result.integrations
+    .map(i => `- ${i.name} (Integration: ${i.integration} | Credential ID: ${i.credentialId})`)
+    .join('\n');
+  return { content: [{ type: 'text', text: `Integration Credentials:\n${list}` }] };
+});
 
-server.tool(
-  'update_credential',
-  'Update an existing credential in a Lamatic project',
-  {
-    projectId: z.string().describe('The project ID'),
-    credentialId: z.string().describe('The credential ID to update'),
-    credentials: z.record(z.string()).describe('Key-value pairs of updated credentials (e.g. { "apiKey": "sk-..." })'),
-  },
-  async ({ projectId, credentialId, credentials }) => {
-    const result = await updateCredential(projectId, credentialId, credentials);
-    return {
-      content: [{ type: 'text', text: result.message }],
-    };
-  }
-);
+server.tool('dev_create_integration_creds', 'Create new integration credentials for a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  name: z.string().describe('Display name for the integration credential'),
+  integration: z.string().describe('Integration type (e.g. s3, slack, postgres, gmail, googleDrive)'),
+  credentials: z.record(z.string()).describe('Key-value pairs of credentials required by the integration'),
+}, async ({ projectId, name, integration, credentials }) => {
+  const result = await createIntegrationCreds(projectId, name, integration, credentials);
+  return { content: [{ type: 'text', text: `Integration credential created!\nCredential ID: ${result.credentialId}` }] };
+});
+
+server.tool('dev_get_cred_info', 'Get details of a specific credential in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  credentialId: z.string().describe('The credential ID'),
+}, async ({ projectId, credentialId }) => {
+  const result = await getCredInfo(projectId, credentialId);
+  const c = result.credential;
+  return {
+    content: [{ type: 'text', text: `Credential Info:\nID: ${c.id}\nName: ${c.name}\nType: ${c.type}\nProvider: ${c.provider}\nCreated At: ${c.created_at}\nUpdated At: ${c.updated_at}` }],
+  };
+});
+
+server.tool('dev_get_oauth_url', 'Get an OAuth authorization URL for an integration in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  nodeName: z.string().describe('The integration node name (e.g. googleDrive, gmail, slack)'),
+  redirectUri: z.string().describe('The redirect URI after OAuth authorization'),
+  credentialName: z.string().describe('Display name for the credential being created'),
+}, async ({ projectId, nodeName, redirectUri, credentialName }) => {
+  const result = await getOAuthUrl(projectId, nodeName, redirectUri, credentialName);
+  return { content: [{ type: 'text', text: `OAuth URL:\n${result.authUrl}` }] };
+});
+
+server.tool('dev_delete_credential', 'Delete a credential from a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  credentialId: z.string().describe('The credential ID to delete'),
+}, async ({ projectId, credentialId }) => {
+  const result = await deleteCredential(projectId, credentialId);
+  return { content: [{ type: 'text', text: result.message }] };
+});
+
+server.tool('dev_update_credential', 'Update an existing credential in a Lamatic project', {
+  projectId: z.string().describe('The project ID'),
+  credentialId: z.string().describe('The credential ID to update'),
+  credentials: z.record(z.string()).describe('Key-value pairs of updated credentials'),
+}, async ({ projectId, credentialId, credentials }) => {
+  const result = await updateCredential(projectId, credentialId, credentials);
+  return { content: [{ type: 'text', text: result.message }] };
+});
 
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('Lamatic MCP Server running...');
+  console.error('Lamatic DevMCP Server running...');
 }
 
 main().catch(console.error);
