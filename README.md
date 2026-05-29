@@ -1,108 +1,139 @@
-# Lamatic MCP Server
+# @lamatic/dev-mcp
 
-## Requirements
+> Manage your Lamatic projects, flows, credentials, and more via AI agents.
 
-- Node.js v16 or higher
-- npm v7 or higher
-- Claude Desktop app
+## What is it?
 
----
+Lamatic DevMCP is an MCP (Model Context Protocol) server that gives AI agents like Claude, GitHub Copilot, and Cursor full control over your Lamatic organization — create projects, manage flows, handle credentials, deployments, integrations, and more.
 
 ## Installation
 
-```
-git clone <your-repo-url>
-cd DevMCP
-npm install
-```
+```bash
+# Run directly via npx (recommended)
+npx @lamatic/dev-mcp
 
----
+# Or install globally
+npm install -g @lamatic/dev-mcp
 
-## Testing with MCP Inspector
-
-### Step 1 — Start the server
-```
-node server.js
+# Or install as a dependency
+npm install @lamatic/dev-mcp
 ```
 
-Should print:
-```
-Lamatic MCP Server running...
-```
+## Setup
 
-### Step 2 — Open Inspector
-```
-npx @modelcontextprotocol/inspector node server.js
+### Claude Code
+```bash
+claude mcp add lamatic-dev -- npx -y @lamatic/dev-mcp
 ```
 
-### Step 3 — Connect
-- Open the URL shown in terminal (e.g. `http://localhost:6274`)
-- Click **Connect**
-- All tools will appear on the left side
+### VS Code
+Add to `.vscode/mcp.json`:
+```json
+{
+  "servers": {
+    "lamatic-dev": {
+      "command": "npx",
+      "args": ["-y", "@lamatic/dev-mcp"],
+      "type": "stdio"
+    }
+  }
+}
+```
 
-### Step 4 — Test auth_login first
-- Click `auth_login`
-- Click **Add pair** and add:
+### Claude Desktop / Cursor
+Add to your MCP config file:
+```json
+{
+  "mcpServers": {
+    "lamatic-dev": {
+      "command": "npx",
+      "args": ["-y", "@lamatic/dev-mcp"]
+    }
+  }
+}
+```
 
-| Key | Value |
-|---|---|
-| apiKey | your-org-api-key |
-| orgId | your-org-id |
-| userId | your-user-id |
+## Authentication
 
-- Click **Run Tool**
-- Should return `Authenticated successfully!`
+Once connected, run the `dev_auth_login` tool:
 
-### Step 5 — Test other tools
-After authenticating, test the remaining tools in this order:
+```
+authenticate with apiKey lt-org-xxx and orgId your-org-id
+```
 
-| Tool | Required Input |
-|---|---|
-| `create_project` | `name`, `region` |
-| `get_project` | `projectId` |
-| `create_flow` | `projectId`, `name` |
-| `get_flows` | `projectId` |
-| `deploy_project` | `projectId` |
+Your credentials are stored locally at `~/.lamatic/config.json`.
 
----
+## Tools
 
-## Available Tools
-
+### Projects
 | Tool | Description |
 |---|---|
-| `auth_login` | Authenticate with your Lamatic API key |
-| `create_project` | Create a new Lamatic project |
-| `get_project` | Fetch details of an existing project |
-| `create_flow` | Create a new flow in a project |
-| `get_flows` | List all flows in a project |
-| `deploy_project` | Trigger a deployment for a project |
+| `dev_list_projects` | List all projects in your org |
+| `dev_create_project` | Create a new project |
+| `dev_get_project` | Get project details |
+| `dev_update_project` | Rename a project |
+| `dev_delete_project` | Delete a project |
+| `dev_deploy_project` | Deploy a project |
 
----
+### Flows
+| Tool | Description |
+|---|---|
+| `dev_list_all_flows` | List all flows in a project |
+| `dev_create_flow` | Create a new flow |
+| `dev_get_flows` | Get flows list |
+| `dev_update_flow` | Update flow nodes and edges |
+| `dev_rename_flow` | Rename a flow |
+| `dev_delete_flow` | Delete a flow |
+| `dev_update_flow_status` | Activate or deactivate a flow |
 
-## Available Regions
+### Deployments
+| Tool | Description |
+|---|---|
+| `dev_list_all_deployments` | List all deployments |
+| `dev_get_deployment` | Get deployment details |
 
-| Region |
-|---|
-| `us-east-1` |
-| `us-west-2` |
-| `eu-west-1` | 
-| `ap-south-1` |
+### Contexts
+| Tool | Description |
+|---|---|
+| `dev_get_all_contexts` | List all contexts |
+| `dev_create_context` | Create a vector or memory context |
+| `dev_get_context` | Get context details |
+| `dev_delete_context` | Delete a context |
 
----
+### Models
+| Tool | Description |
+|---|---|
+| `dev_list_model_creds` | List model credentials |
+| `dev_list_model_providers` | List available providers |
+| `dev_check_model_status` | Check model availability |
+| `dev_create_model_creds` | Add model credentials |
 
-## Project Structure
+### Integrations
+| Tool | Description |
+|---|---|
+| `dev_list_supported_integrations` | List supported integrations |
+| `dev_list_integration_creds` | List integration credentials |
+| `dev_create_integration_creds` | Add integration credentials |
+
+### Credentials
+| Tool | Description |
+|---|---|
+| `dev_get_cred_info` | Get credential details |
+| `dev_get_oauth_url` | Get OAuth URL for an integration |
+| `dev_update_credential` | Update a credential |
+| `dev_delete_credential` | Delete a credential |
+
+## Example Usage
 
 ```
-DevMCP/
-├── utils/
-│   ├── api.js
-│   └── config.js
-├── server.js
-├── package.json
-└── node_modules/
+list all my Lamatic projects
+create a new project called "my-ai-app" in us-east-1
+list all flows in project fcd1aa1d-...
+rename flow abc123 to "New Flow Name"
+deploy project fcd1aa1d-...
 ```
 
-
-## Support
-
-- Documentation: [lamatic.ai/docs](https://lamatic.ai/docs)
+## Links
+- [Lamatic](https://lamatic.ai)
+- [GraphMCP](https://github.com/Lamatic/GraphMCP-Lamatic) — Execute Lamatic flows via AI
+- [npm](https://www.npmjs.com/package/@lamatic/dev-mcp)
