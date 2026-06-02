@@ -1,6 +1,6 @@
 {
   "name": "@lamatic/dev-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Lamatic DevMCP - Manage your Lamatic projects via AI",
   "main": "server.js",
   "bin": {
